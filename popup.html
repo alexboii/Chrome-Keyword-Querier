@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+tr {
+  white-space: nowrap;
+}
+.results {
+  text-align: right;
+  min-width: 6em;
+  color: black;
+}
+body {
+  min-width: 400px;
+}
+
+</style>
+</head>
+
+<body>
+
+  <div id="error-message" style="margin-bottom: 0.5em; visibility: hidden; color: red; font-style: italic;"></div>
+
+  <div id="keywords-div">
+      <h4>Keywords to query</h4>
+      <input type="text" id="keywords-field" placeholder="Enter keywords separated by commas" style="margin-bottom: 0.5em; min-width: 400px;"/>
+
+  </div>
+
+  <div id="websites-div">
+    <h4>Websites to query</h4>
+    <div id="readroot" style="display: none">
+      <input type="url" id ="input-website" name="websiteURL" placeholder="Enter website URL" style="margin-bottom: 0.5em; min-width: 400px;"/>
+    </div>
+
+    <span id="writeroot"></span>
+
+    <input type="image" id="add-fields" value="Give me more fields!" src="images/plus.png" height="25px" width="25px" style="margin-top: 2em;" />
+    <input type="image" id="remove-field" value="Remove review" src="images/minus.png" height="25px" width="25px" style="margin-top: 2em;" />
+    <input type="image" id="refresh-field" value="Refresh" src="images/refresh.png" height="25px" width="25px" align="right" style="margin-top: 2em;" />
+
+  </div>
+
+<script src="popup.js"></script>
+
+</body>
+
+</html>
