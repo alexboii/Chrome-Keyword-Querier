@@ -1,6 +1,7 @@
 
 var errormsg = "";
 var counter;
+var flag = false;
 
 var websites = [];
 var keywords = [];
@@ -8,11 +9,12 @@ var keywords = [];
 // TODO: ADD INTERVAL		
 // TODO: ERROR TEXT CSS STYLE FOR APPEARING
 // TODO: ADD SO THAT KEYWORDS GET ADDED UP AS DIFFERENT POPUPS LIKE IN TUMBLR 
-
-// https://stackoverflow.com/questions/29222861/getting-multiple-items-from-chrome-storage
+// TODO: FREQUENCY OF KEYWORDS IN A PAGE (CLICK FOR FREQUENCY)
+// TODO: MAKE A "FANCIER"" NOTIFICATION POPUP
+// TODO: PUT CSS AS EXTERNAL SHEET
 
 chrome.storage.sync.get(["counter", "websites", "keywords"], function (result) {
- 
+
   if (result.counter === undefined) {
     counter = 0;
   } else {
@@ -67,7 +69,7 @@ function fillAllFields() {
     document.getElementById("enter-website-" + i).value = websites[i - 1];
   }
 
-    document.getElementById("keywords-field").value = keywords.join(", ");
+  document.getElementById("keywords-field").value = keywords.join(", ");
 
 }
 
@@ -175,9 +177,13 @@ window.onload = function () {
     }
 
     if (errormsg != "") {
+      flag = false;
       error(errormsg);
+    }else{
+      flag = true;
     }
 
+    chrome.storage.sync.set({ 'flag': flag }, function () { });
     chrome.storage.sync.set({ 'websites': websites }, function () { });
     chrome.storage.sync.set({ 'keywords': keywords }, function () { });
 
