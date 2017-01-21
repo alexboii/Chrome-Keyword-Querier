@@ -6,14 +6,20 @@ var flag = false;
 var websites = [];
 var keywords = [];
 
-// TODO: ADD INTERVAL		
-// TODO: ERROR TEXT CSS STYLE FOR APPEARING
-// TODO: ADD SO THAT KEYWORDS GET ADDED UP AS DIFFERENT POPUPS LIKE IN TUMBLR 
-// TODO: FREQUENCY OF KEYWORDS IN A PAGE (CLICK FOR FREQUENCY)
-// TODO: MAKE A "FANCIER"" NOTIFICATION POPUP
-// TODO: PUT CSS AS EXTERNAL SHEET
+var duration_mantissa = document.getElementById("duration-field").value;
+var duration_unit = document.getElementById("duration-options").value;
+var case_sensitive = document.getElementById("case-sensitive-checkbox").checked;
 
-chrome.storage.sync.get(["counter", "websites", "keywords"], function (result) {
+
+// TODO: ADD INTERVAL ERROR CHECK (DO TESTS TO SEE MINIMAL LIMIT OF XML REQUEST)
+// TODO: BETTER ERROR TEXT CSS STYLE 
+// TODO: ADD SO THAT KEYWORDS GET ADDED UP AS DIFFERENT POPUPS LIKE IN TUMBLR 
+// TODO: MAKE A "FANCIER"" NOTIFICATION POPUP
+// TODO: NOTIFICATION WHEN KEYWORD CHANGES, KEYWORD FOUND
+// TODO: SAVE RESULTS TO EXTERNAL TXT FILE 
+
+
+chrome.storage.sync.get(["counter", "websites", "keywords", "duration_mantissa", "duration_unit", "case_sensitive"], function (result) {
 
   if (result.counter === undefined) {
     counter = 0;
@@ -27,13 +33,31 @@ chrome.storage.sync.get(["counter", "websites", "keywords"], function (result) {
     return;
   } else {
     websites = result.websites;
-    console.log(websites);
     fillAllFields();
   }
 
-});
+  if (result.duration_mantissa === undefined || result.duration_mantissa <= 0) {
+    return;
+  } else {
+    duration_mantissa = result.duration_mantissa;
+    document.getElementById("duration-field").value = duration_mantissa;
+  }
 
-// chrome.browserAction.setPopup({ popup: "popup.html" });
+  if (result.duration_unit === undefined || result.duration_unit <= 0) {
+    return;
+  } else {
+    duration_unit = result.duration_unit;
+    document.getElementById("duration-options").value = duration_unit;
+  }
+
+  if (result.case_sensitive === undefined) {
+    return;
+  } else {
+    case_sensitive = result.case_sensitive;
+    document.getElementById("case-sensitive-checkbox").checked = case_sensitive;
+  }
+
+});
 
 function error(errorstr) {
   document.getElementById("error-message").style.visibility = "visible";
@@ -55,7 +79,6 @@ function hideError() {
 function addAllFields() {
 
   var temp_counter = counter;
-  console.log("HELLO: " + temp_counter);
   counter = 0;
   for (var i = 0; i < temp_counter; i++) {
     moreFields();
@@ -65,7 +88,6 @@ function addAllFields() {
 
 function fillAllFields() {
   for (var i = 1; i <= websites.length; i++) {
-    console.log("HERE: " + websites[i]);
     document.getElementById("enter-website-" + i).value = websites[i - 1];
   }
 
@@ -81,20 +103,16 @@ function moreFields() {
   newFields.style.display = "block";
 
   var newField = newFields.childNodes;
-  console.log("1 \\" + newField);
 
   for (var i = 0; i < newField.length; i++) {
     var theName = newField[i].name
-    console.log("2 \\" + theName);
   }
 
   if (theName) {
     newField[i].name = theName + counter;
-    console.log("3 \\" + newField[i].name);
   }
 
   var insertHere = document.getElementById("writeroot");
-  console.log(newFields);
   insertHere.parentNode.insertBefore(newFields, insertHere);
 
   chrome.storage.sync.set({ 'counter': counter }, function () { });
@@ -109,15 +127,26 @@ function remove() {
 }
 
 
-// document.addEventListener("DOMContentLoaded", function () {
+function openTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
 
-//   var link = document.getElementById("remove-field");
-//   console.log(link);
-//   link.addEventListener("click", function () {
-//       console.log("Am I here?");
-//       this.parentNode.removeChild(this.parentNode); 
-//   });
-// });
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the link that opened the tab
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
 
 chrome.extension.onMessage.addListener(
   function (request, sender, sendResponse) {
@@ -135,6 +164,11 @@ chrome.extension.onMessage.addListener(
 
 document.getElementById("add-fields").onclick = moreFields;
 document.getElementById("remove-field").onclick = remove;
+document.getElementById("options-tab").onclick = function () { openTab(event, "Selection") };
+document.getElementById("results-tab").onclick = function () { openTab(event, "Results") };
+
+document.getElementById("options-tab").click();
+
 
 // REGEX COURTESY OF MATTHEW O'RIORDAN FROM STACK OVERFLOW 
 var urlpattern = new RegExp(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/);
@@ -172,6 +206,20 @@ window.onload = function () {
       }
     }
 
+    duration_unit = document.getElementById("duration-options").value;
+    duration_mantissa = document.getElementById("duration-field").value;
+    case_sensitive = document.getElementById("case-sensitive-checkbox").checked;
+    var timeout_duration = 10000;
+
+    if ((duration_mantissa === undefined || duration_mantissa <= 0)) {
+      errormsg += "Please enter the duration of your query interval, ";
+    } else {
+      chrome.storage.sync.set({ 'duration_mantissa': duration_mantissa }, function () { });
+      chrome.storage.sync.set({ 'duration_unit': duration_unit }, function () { });
+      timeout_duration = duration_unit * duration_mantissa;
+    }
+
+
     if ((websites === undefined || websites.length == 0) && control_bool) {
       errormsg += "Please enter at least one website, ";
     }
@@ -179,16 +227,16 @@ window.onload = function () {
     if (errormsg != "") {
       flag = false;
       error(errormsg);
-    }else{
+    } else {
       flag = true;
     }
 
     chrome.storage.sync.set({ 'flag': flag }, function () { });
     chrome.storage.sync.set({ 'websites': websites }, function () { });
     chrome.storage.sync.set({ 'keywords': keywords }, function () { });
+    chrome.storage.sync.set({ 'timeout_duration': timeout_duration }, function () { });
+    chrome.storage.sync.set({ 'case_sensitive': case_sensitive }, function () { });
 
-    console.log("Titles: " + websites.join(", ") + "\\ " + counter);
-    console.log(keywords);
   }
 }
 

@@ -9,68 +9,65 @@ var NOTIFICATION_OPTIONS = {
     iconUrl: "clock.png"
 }
 
-var word_count = {};
-var timeout_duration = 10000; // 10 SECONDS DEFAULT
+var word_count = [];
 var JSONresults;
-var case_sensitive = false;
-
 
 chrome.browserAction.onClicked.addListener(function (tab) {
     chrome.tabs.executeScript(null, { file: "popup.js" });
 });
 
 function query() {
-    chrome.storage.sync.get(["counter", "websites", "keywords", "flag", "timeout_duration", "case_sensitive"], function (result) {
+    chrome.storage.sync.get(["counter", "websites", "keywords", "flag"], function (result) {
         console.log(result.flag);
         console.log(result.counter);
         console.log(result.keywords);
         console.log(result.websites);
 
 
-        if (result.timeout_duration !== undefined) {
-            timeout_duration = result.timeout_duration;
-        }
-
-        if (result.case_sensitive !== undefined) {
-            case_sensitive = result.case_sensitive;
-        }
-
-
         if (result.flag == true) {
+            var try2 = document.getElementById("display-results");
+            try2.innerHTML += "<div>";
+            var results_string = "";
 
-            var result_display = document.getElementById("display-results");
-            result_display.innerHTML = "<div>";
 
             for (var i = 0; i < result.websites.length; i++) {
+                results_string = "";
+                JSONresults = "";
+                var website_name = "<h4> Website #" + (i + 1) + ": <h4>";
+                try2.innerHTML += website_name;
+
                 performCORSRequest(result.websites[i], result.keywords);
-            }
 
-            console.log(JSON.stringify(word_count) + " // " + result.websites.length);
-            for (var i = 0; i < result.websites.length; i++) {
+                console.log("BRO WHAT?");
 
-                result_display.innerHTML += "<h4> Website #" + (i + 1) + ": <h4>";
-
-                var keywords_array = word_count[result.websites[i]];
-
-                console.log("Keywords array: " + keywords_array.toString());
-
-                for (var j = 0; j < result.keywords.length; j++) {
-                    result_display.innerHTML += result.keywords[j] + ": " + keywords_array[j] + " ";
+                if (word_count.length != 0) {
+                    for (var j = 0; j < word_count.length; j++) {
+                            results_string += JSON.stringify(JSONresults[j].keyword) + ": " + JSON.stringify(JSONresults[j].occurrences) + "\n";
+                            console.log(results_string);
+                    }
                 }
 
-                result_display.innerHTML += "</hr>";
+                console.log("BROSKI: " + results_string);
+
+                try2.innerHTML += "<p>" + results_string + "</p>";
+                
+                word_count.length = 0;
+
             }
 
-            result_display.innerHTML += "</div>";
-
-            word_count = {};
-            console.log(JSON.stringify(word_count) + " // " + result.websites.length);
-
+            try2.innerHTML += "</div><hr>";
         }
+
+        // if (result.flag == false) {
+        //     document.getElementById("error-message").style.visibility = "visible";
+        //     document.getElementById("error-message").innerHTML = "hello";
+        // }
+
 
     });
 
-    setTimeout(query, timeout_duration);
+
+    setTimeout(query, 10000);
 }
 
 query();
@@ -80,6 +77,7 @@ query();
 function performCORSRequest(targetURL, keywords) {
 
     console.log("Entrance CORS method: " + targetURL + " // " + keywords);
+
 
     var request = false;
     request = new XMLHttpRequest();
@@ -91,21 +89,18 @@ function performCORSRequest(targetURL, keywords) {
     request.setRequestHeader("X-Requested-With", "*");
     request.onreadystatechange = function () {
         if (request.readyState === 4) {
-
-            var occurrences_array = [];
+            console.log("Length: " + keywords.length);
             for (var i = 0; i < keywords.length; i++) {
-                if (case_sensitive == false) {
-                    occurrences_array.push(occurrences(request.responseText.replace(/(<([^>]+)>)/ig, "").toLowerCase(), keywords[i]));
-                } else {
-                    occurrences_array.push(occurrences(request.responseText.replace(/(<([^>]+)>)/ig, ""), keywords[i]));
-                }
+                word_counter.push(occurrences(request.responseText.replace(/(<([^>]+)>)/ig, "").toLowerCase());
             }
 
-            word_count[targetURL] = occurrences_array;
-
         }
+
     };
 
+
+    JSONresults = JSON.parse(JSON.stringify(word_count));
+    console.log("HERE:" + word_count);
     request.send();
 }
 
