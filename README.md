@@ -14,6 +14,6 @@ In this project, I have created a Chrome extension which lets you query several 
 
 ## Screenshots
 
-!(https://i.imgur.com/aBnDqEU.png)[screenshot1]
-!(https://i.imgur.com/8ukfNty.png)[screenshot2]
-!(https://i.imgur.com/dUiGeT2.png)[screenshot3]
+![screenshot1](https://i.imgur.com/aBnDqEU.png)
+![screenshot2](https://i.imgur.com/8ukfNty.png)
+![screenshot3](https://i.imgur.com/dUiGeT2.png)
