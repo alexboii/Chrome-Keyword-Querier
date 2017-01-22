@@ -95,7 +95,7 @@ function performCORSRequest(targetURL, keywords) {
             var occurrences_array = [];
             for (var i = 0; i < keywords.length; i++) {
                 if (case_sensitive == false) {
-                    occurrences_array.push(occurrences(request.responseText.replace(/(<([^>]+)>)/ig, "").toLowerCase(), keywords[i]));
+                    occurrences_array.push(occurrences(request.responseText.replace(/(<([^>]+)>)/ig, "").toLowerCase(), keywords[i].toLowerCase()));
                 } else {
                     occurrences_array.push(occurrences(request.responseText.replace(/(<([^>]+)>)/ig, ""), keywords[i]));
                 }
